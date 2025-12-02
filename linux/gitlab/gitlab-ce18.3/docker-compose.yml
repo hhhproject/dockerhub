@@ -1,0 +1,22 @@
+services:
+  gitlab:
+    image: registry.cn-hangzhou.aliyuncs.com/hhh_project/gitlab-ce:18.3
+    restart: unless-stopped
+    shm_size: '2028m'  # 共享内存（避免502错误）
+    environment:
+      TZ: Asia/Shanghai  # 时区设置
+      GITLAB_OMNIBUS_CONFIG: |
+        unicorn['worker_processes'] = 4
+        sidekiq['concurrency'] = 10
+        # external_url 'http://192.168.1.100:8081'  # 外部访问地址
+        # gitlab_rails['gitlab_shell_ssh_port'] = 2222  # 自定义SSH端口
+        prometheus_monitoring['enable'] = false
+    ports:
+      - "8081:80"    # HTTP端口
+      - "8443:443"  # HTTPS端口
+      - "2222:22"   # SSH端口映射
+    volumes:
+      - ./config:/etc/gitlab
+      - ./logs:/var/log/gitlab
+      - ./data:/var/opt/gitlab
+    container_name: gitlab

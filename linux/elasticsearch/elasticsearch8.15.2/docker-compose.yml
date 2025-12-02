@@ -1,0 +1,70 @@
+# author wuhao
+version: '3'
+services:
+  elasticsearch:
+    image: 'registry.cn-hangzhou.aliyuncs.com/hhh_project/elasticsearch:8.15.2'
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - ${ES_LOCAL_PORT}:9200
+      - 9300:9300
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - "./elasticsearch/data:/usr/share/elasticsearch/data"
+      - "./elasticsearch/logs:/usr/share/elasticsearch/logs"
+      # - "./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml"
+      # - "./elasticsearch/config/jvm.options:/usr/share/elasticsearch/config/jvm.options"
+      # - "./elasticsearch/plugins/ik:/usr/share/elasticsearch/plugins/ik" # IK中文分词插件
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=en_US.UTF-8
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=${ES_LOCAL_PASSWORD}   # elastic账号密码
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=false
+      - xpack.license.self_generated.type=trial
+      - xpack.ml.use_auto_machine_memory_percent=true
+      - ES_JAVA_OPTS=-Xms${ES_LOCAL_HEAP_INIT} -Xmx${ES_LOCAL_HEAP_MAX}
+      - TAKE_FILE_OWNERSHIP=true   # 权限
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --output /dev/null --silent --head --fail -u elastic:${ES_LOCAL_PASSWORD} http://elasticsearch:${ES_LOCAL_PORT}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    container_name: elasticsearch
+  kibana:
+    image: 'registry.cn-hangzhou.aliyuncs.com/hhh_project/kibana:8.15.2'
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - ${KIBANA_LOCAL_PORT}:5601
+    volumes:
+      - ./elasticsearch/kibana/data:/usr/share/kibana/data
+      # - ./elasticsearch/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
+    environment:
+      - SERVER_NAME=kibana
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_LOCAL_PASSWORD}
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${KIBANA_ENCRYPTION_KEY}
+      - ELASTICSEARCH_PUBLICBASEURL=http://localhost:${ES_LOCAL_PORT}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s -I http://kibana:5601 | grep -q 'HTTP/1.1 302 Found'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+    depends_on:
+      - elasticsearch
+    container_name: kibana

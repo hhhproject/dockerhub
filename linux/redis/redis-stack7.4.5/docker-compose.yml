@@ -1,0 +1,18 @@
+services:
+  redis-stack:
+    image: 'registry.cn-hangzhou.aliyuncs.com/openyourdream/redis-stack:7.4.5'
+    restart: unless-stopped
+    privileged: true
+    # 启动redis服务并添加密码为：Admin-667788，
+    # 开启RDB设置，save 900 1 表示在900秒（15分钟）内至少有1个键被修改时执行快照操作；save 300 10 表示在300秒（5分钟）内至少有10个键被修改时执行快照操作；save 60 10000表示在60秒内至少有10000个键被修改时执行快照操作。
+    # 开启AOF设置，appendfsync everysec，它表示每秒将AOF缓冲区的数据同步到磁盘
+    environment:
+      REDIS_ARGS: "--requirepass Admin-667788 --save 900 1 --save 300 10 --save 60 10000 --appendonly yes --appendfsync everysec"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - '/data/docker-volumes/redis:/data'
+    ports:
+      - '16379:6379'
+      - '18001:8001'   # 登录用户default
+    # network_mode: host
+    container_name: redis-stack

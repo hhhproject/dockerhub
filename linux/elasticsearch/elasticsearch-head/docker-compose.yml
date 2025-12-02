@@ -1,0 +1,11 @@
+# author wuhao
+services:
+  elasticsearch-head:
+    image: registry.cn-hangzhou.aliyuncs.com/openyourdream/elasticsearch-head:5
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - '9100:9100'
+    volumes:
+      - "/etc/localtime:/etc/localtime"
+    container_name: elasticsearch-head

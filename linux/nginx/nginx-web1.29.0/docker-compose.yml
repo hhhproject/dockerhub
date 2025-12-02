@@ -1,0 +1,15 @@
+services:
+  nginx:
+    image: 'registry.cn-hangzhou.aliyuncs.com/hhh_project/nginx:1.29.0'
+    restart: always
+    privileged: true
+    tty: true
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - './nginx/nginx.conf:/etc/nginx/nginx.conf'
+      - './nginx/conf.d:/etc/nginx/conf.d:ro'
+      - './html:/app/html:ro'
+    ports:
+      - '8001:80'
+      - '8002:8081'
+    container_name: nginx-web

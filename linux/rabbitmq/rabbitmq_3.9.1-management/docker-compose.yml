@@ -1,0 +1,16 @@
+services:
+  rabbitmq:
+    image: registry.cn-hangzhou.aliyuncs.com/hhh_project/rabbitmq:3.9.1-management
+    hostname: my-rabbitmq
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      LANG: en_US.UTF-8
+    volumes:
+      - "./rabbitmq/config/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf"
+      - "./rabbitmq/config/10-default-guest-user.conf:/etc/rabbitmq/conf.d/10-default-guest-user.conf"
+      - "./rabbitmq/data:/var/lib/rabbitmq"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    container_name: rabbitmq
