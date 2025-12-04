@@ -12,3 +12,13 @@
 - mongodb
 
 - redis
+
+- elseticsearch
+
+- gitlab
+
+- nginx
+
+- rabbitmq
+
+- wordpress
